@@ -1,0 +1,9 @@
+# Ignore files that should not be in the Docker image
+.git
+.github
+README.md
+.dockerignore
+.gitignore
+demo.ps1
+task-definition.json
+*.md

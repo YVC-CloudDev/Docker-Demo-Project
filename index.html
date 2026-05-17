@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudShip — Container Demo</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Animated background particles -->
+    <canvas id="particles"></canvas>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="logo">⛴️</span> CloudShip
+        </div>
+        <div class="nav-links">
+            <a href="#hero">Home</a>
+            <a href="#pipeline">Pipeline</a>
+            <a href="#tech">Stack</a>
+            <a href="#status">Status</a>
+        </div>
+        <div class="nav-status">
+            <span class="status-dot"></span> Live
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">v2.0.0 • Deployed with CI/CD</div>
+            <h1 class="hero-title">
+                Ship Code.<br>
+                <span class="gradient-text">Not Servers.</span>
+            </h1>
+            <p class="hero-subtitle">
+                A containerized web application deployed automatically 
+                with GitHub Actions, Docker, and AWS ECS.
+            </p>
+            <div class="hero-actions">
+                <a href="#pipeline" class="btn btn-primary">View Pipeline</a>
+                <a href="#tech" class="btn btn-secondary">Tech Stack</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="terminal">
+                <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">terminal</span>
+                </div>
+                <div class="terminal-body" id="terminal-output">
+                    <div class="line"><span class="prompt">$</span> <span class="typing" id="typing"></span><span class="cursor">|</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pipeline Section -->
+    <section id="pipeline" class="section">
+        <h2 class="section-title">CI/CD Pipeline</h2>
+        <p class="section-subtitle">From git push to production in minutes</p>
+        <div class="pipeline">
+            <div class="pipeline-step" data-step="1">
+                <div class="step-icon">📝</div>
+                <div class="step-label">Push Code</div>
+                <div class="step-detail">git push origin main</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step" data-step="2">
+                <div class="step-icon">⚙️</div>
+                <div class="step-label">GitHub Actions</div>
+                <div class="step-detail">Build & Test</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step" data-step="3">
+                <div class="step-icon">🐳</div>
+                <div class="step-label">Docker Build</div>
+                <div class="step-detail">docker build -t app .</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step" data-step="4">
+                <div class="step-icon">📦</div>
+                <div class="step-label">Push to ECR</div>
+                <div class="step-detail">docker push</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step active" data-step="5">
+                <div class="step-icon">🚀</div>
+                <div class="step-label">Deploy ECS</div>
+                <div class="step-detail">Live!</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack Section -->
+    <section id="tech" class="section section-dark">
+        <h2 class="section-title">Tech Stack</h2>
+        <p class="section-subtitle">Modern cloud-native architecture</p>
+        <div class="cards">
+            <div class="card">
+                <div class="card-icon">🐳</div>
+                <h3>Docker</h3>
+                <p>Containerized with nginx:alpine for minimal footprint and maximum portability</p>
+                <div class="card-tag">Container Runtime</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">📦</div>
+                <h3>AWS ECR</h3>
+                <p>Private container registry with vulnerability scanning and lifecycle policies</p>
+                <div class="card-tag">Registry</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">☁️</div>
+                <h3>AWS ECS Fargate</h3>
+                <p>Serverless container hosting — no servers to manage, auto-scaling built in</p>
+                <div class="card-tag">Compute</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🔄</div>
+                <h3>GitHub Actions</h3>
+                <p>Automated CI/CD pipeline triggered on every push to main branch</p>
+                <div class="card-tag">CI/CD</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🌐</div>
+                <h3>HTML / CSS / JS</h3>
+                <p>Modern responsive frontend with animations, particles, and dark theme</p>
+                <div class="card-tag">Frontend</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🔒</div>
+                <h3>IAM & Security</h3>
+                <p>Least-privilege IAM roles, encrypted secrets, and private networking</p>
+                <div class="card-tag">Security</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Status Section -->
+    <section id="status" class="section">
+        <h2 class="section-title">Deployment Status</h2>
+        <p class="section-subtitle">Real-time container information</p>
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-label">Container</div>
+                <div class="status-value" id="container-id">—</div>
+            </div>
+            <div class="status-card">
+                <div class="status-label">Uptime</div>
+                <div class="status-value" id="uptime">0s</div>
+            </div>
+            <div class="status-card">
+                <div class="status-label">Deployed At</div>
+                <div class="status-value" id="deploy-time">—</div>
+            </div>
+            <div class="status-card">
+                <div class="status-label">Health</div>
+                <div class="status-value health-ok">● Healthy</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">⛴️ CloudShip Demo</div>
+            <div class="footer-info">
+                Cloud-Based Application Development — YVC 2026
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com">GitHub</a>
+                <a href="https://docker.com">Docker</a>
+                <a href="https://aws.amazon.com">AWS</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
