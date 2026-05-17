@@ -2,17 +2,23 @@
 #  Option 3: Build & Push to AWS ECR (Elastic Container Registry)
 # ═══════════════════════════════════════════════════════════════════
 #
+#  AUTHENTICATION: AWS OIDC (assume role — no static keys!)
+#
 #  SETUP REQUIRED:
 #  1. Create ECR repository:
 #     aws ecr create-repository --repository-name cloudship --region us-east-1
 #
-#  2. Create IAM user with ECR permissions (or use OIDC — see advanced)
+#  2. Create IAM OIDC Identity Provider in AWS:
+#     - Provider URL: https://token.actions.githubusercontent.com
+#     - Audience: sts.amazonaws.com
 #
-#  3. Add GitHub Secrets:
-#     - AWS_ACCESS_KEY_ID
-#     - AWS_SECRET_ACCESS_KEY
+#  3. Create IAM Role with trust policy for GitHub Actions:
+#     (see README for full trust policy JSON)
 #
-#  4. Add GitHub Variables (Settings → Variables → Actions):
+#  4. Add GitHub Secrets:
+#     - AWS_ROLE_ARN  (e.g., arn:aws:iam::123456789012:role/github-actions-ecr)
+#
+#  5. Add GitHub Variables (Settings → Variables → Actions):
 #     - AWS_REGION        (e.g., us-east-1)
 #     - ECR_REPOSITORY    (e.g., cloudship)
 #
@@ -25,6 +31,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-push:
     name: Build & Push to ECR
@@ -34,11 +44,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Login to Amazon ECR

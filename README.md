@@ -82,8 +82,8 @@ Choose the option that matches your learning stage:
 |---|--------|----------|--------|:----------:|-------|
 | 1 | **Docker Hub** | Docker Hub | Manual pull | ⭐ | 2 secrets |
 | 2 | **GHCR** | GitHub Packages | Manual pull | ⭐ | **None!** |
-| 3 | **AWS ECR** | AWS ECR | Manual | ⭐⭐ | 2 secrets + 2 vars |
-| 4 | **ECR + ECS** | AWS ECR | Auto → ECS | ⭐⭐⭐ | 2 secrets + 5 vars |
+| 3 | **AWS ECR** | AWS ECR | Manual | ⭐⭐ | OIDC role + 1 secret + 2 vars |
+| 4 | **ECR + ECS** | AWS ECR | Auto → ECS | ⭐⭐⭐ | OIDC role + 1 secret + 5 vars |
 
 > **💡 Tip:** Start with Option 2 (GHCR) — it requires zero setup!
 
@@ -158,6 +158,8 @@ docker run -d -p 8080:80 ghcr.io/YVC-CloudDev/docker-demo-project:latest
 
 **Best for:** Private images, AWS integration, production workloads.
 
+> 🔐 **Uses OIDC Role Assumption** — no static AWS keys needed!
+
 ### Setup Steps
 
 1. **Create ECR repository:**
@@ -165,17 +167,44 @@ docker run -d -p 8080:80 ghcr.io/YVC-CloudDev/docker-demo-project:latest
    aws ecr create-repository --repository-name cloudship --region us-east-1
    ```
 
-2. **Create IAM user** with these permissions:
-   - `AmazonEC2ContainerRegistryPowerUser`
+2. **Create OIDC Identity Provider** in AWS IAM:
+   - Go to **IAM → Identity providers → Add provider**
+   - Provider type: **OpenID Connect**
+   - Provider URL: `https://token.actions.githubusercontent.com`
+   - Audience: `sts.amazonaws.com`
 
-3. **Add GitHub Secrets:**
+3. **Create IAM Role** with this trust policy:
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Principal": {
+           "Federated": "arn:aws:iam::ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
+         },
+         "Action": "sts:AssumeRoleWithWebIdentity",
+         "Condition": {
+           "StringEquals": {
+             "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+           },
+           "StringLike": {
+             "token.actions.githubusercontent.com:sub": "repo:YVC-CloudDev/Docker-Demo-Project:*"
+           }
+         }
+       }
+     ]
+   }
+   ```
+   Attach policy: `AmazonEC2ContainerRegistryPowerUser`
+
+4. **Add GitHub Secret:**
 
    | Secret Name | Value |
    |-------------|-------|
-   | `AWS_ACCESS_KEY_ID` | IAM user access key |
-   | `AWS_SECRET_ACCESS_KEY` | IAM user secret key |
+   | `AWS_ROLE_ARN` | `arn:aws:iam::ACCOUNT_ID:role/github-actions-ecr` |
 
-4. **Add GitHub Variables** (Settings → Variables → Actions → New variable):
+5. **Add GitHub Variables** (Settings → Variables → Actions → New variable):
 
    | Variable Name | Value |
    |---------------|-------|
@@ -185,7 +214,7 @@ docker run -d -p 8080:80 ghcr.io/YVC-CloudDev/docker-demo-project:latest
 ### Flow
 
 ```
-git push → GitHub Actions → docker build → docker push → AWS ECR (private)
+git push → GitHub Actions → assume IAM role (OIDC) → docker build → docker push → AWS ECR (private)
 ```
 
 ---
@@ -194,22 +223,28 @@ git push → GitHub Actions → docker build → docker push → AWS ECR (privat
 
 **Best for:** Full production deployment — push code, app goes live automatically!
 
+> 🔐 **Uses OIDC Role Assumption** — same role from Option 3, add ECS permissions.
+
 ### Setup Steps
 
-1. Complete **Option 3** setup first
+1. Complete **Option 3** setup first (OIDC provider + role + ECR repo)
 
-2. **Create ECS Cluster:**
+2. **Add ECS permissions** to the IAM role:
+   - `AmazonECS_FullAccess`
+   - `iam:PassRole` (for task execution role)
+
+3. **Create ECS Cluster:**
    ```bash
    aws ecs create-cluster --cluster-name cloudship-cluster --region us-east-1
    ```
 
-3. **Register Task Definition:**
+4. **Register Task Definition:**
    ```bash
    aws ecs register-task-definition --cli-input-json file://task-definition.json --region us-east-1
    ```
    > ⚠️ Edit `task-definition.json` first — replace `ACCOUNT_ID` and `REGION`
 
-4. **Create ECS Service:**
+5. **Create ECS Service:**
    ```bash
    aws ecs create-service \
      --cluster cloudship-cluster \
@@ -220,7 +255,7 @@ git push → GitHub Actions → docker build → docker push → AWS ECR (privat
      --network-configuration "awsvpcConfiguration={subnets=[YOUR_SUBNET],securityGroups=[YOUR_SG],assignPublicIp=ENABLED}"
    ```
 
-5. **Add additional GitHub Variables:**
+6. **Add GitHub Variables:**
 
    | Variable Name | Value |
    |---------------|-------|
@@ -231,7 +266,7 @@ git push → GitHub Actions → docker build → docker push → AWS ECR (privat
 ### Flow
 
 ```
-git push → GitHub Actions → docker build → push to ECR → update ECS → 🚀 LIVE!
+git push → GitHub Actions → assume IAM role (OIDC) → build → push to ECR → update ECS → 🚀 LIVE!
 ```
 
 ---
