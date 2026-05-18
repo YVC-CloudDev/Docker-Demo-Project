@@ -27,7 +27,9 @@
 name: "Option 3: AWS ECR"
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   id-token: write

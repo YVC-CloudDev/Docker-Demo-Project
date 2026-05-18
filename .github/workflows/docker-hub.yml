@@ -14,7 +14,9 @@
 name: "Option 1: Docker Hub"
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: cloudship
