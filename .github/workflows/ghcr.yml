@@ -14,9 +14,7 @@
 name: "Option 2: GitHub Container Registry"
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger only
 
 env:
   REGISTRY: ghcr.io

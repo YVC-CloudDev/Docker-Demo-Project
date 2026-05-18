@@ -4,11 +4,11 @@
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
   "memory": "512",
-  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::232351199261:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
       "name": "cloudship",
-      "image": "ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/cloudship:latest",
+      "image": "232351199261.dkr.ecr.us-east-1.amazonaws.com/cloudship:latest",
       "portMappings": [
         {
           "containerPort": 80,
@@ -20,7 +20,7 @@
         "logDriver": "awslogs",
         "options": {
           "awslogs-group": "/ecs/cloudship",
-          "awslogs-region": "REGION",
+          "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs",
           "awslogs-create-group": "true"
         }

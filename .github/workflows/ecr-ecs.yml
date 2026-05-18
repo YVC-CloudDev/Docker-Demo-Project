@@ -88,6 +88,12 @@ jobs:
           cluster: ${{ vars.ECS_CLUSTER }}
           wait-for-service-stability: true
 
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
+
       - name: Summary
         run: |
           echo "## 🚀 Deployed to ECS!" >> $GITHUB_STEP_SUMMARY
@@ -95,3 +101,4 @@ jobs:
           echo "**Image:** \`${{ steps.build-image.outputs.image }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Cluster:** ${{ vars.ECS_CLUSTER }}" >> $GITHUB_STEP_SUMMARY
           echo "**Service:** ${{ vars.ECS_SERVICE }}" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** https://docker.demo.rotem.click" >> $GITHUB_STEP_SUMMARY
